@@ -1,7 +1,7 @@
 // components/pos-interface.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -79,9 +79,11 @@ export default function PosInterface() {
   } | null>(null);
   const [showTherapistSelector, setShowTherapistSelector] = useState(false);
   const [showKeyboard, setShowKeyboard] = useState(false);
+  const [showSearchKeyboard, setShowSearchKeyboard] = useState(false);
   const [activeKeyboardField, setActiveKeyboardField] = useState<
     "voucherCode" | "voucherAmount" | null
   >(null);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   const categories = Object.entries(CATEGORY_LABELS).map(([value, label]) => ({
     id: value as ServiceCategory,
@@ -379,6 +381,23 @@ export default function PosInterface() {
 
   const topPadding = user?.role === "manager" ? "mt-0" : "mt-20";
 
+  // Add click outside handler
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
+        setShowSearchKeyboard(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <div
       className={`grid grid-cols-1 lg:grid-cols-3 gap-6 ${topPadding} transition-all duration-300`}
@@ -393,17 +412,57 @@ export default function PosInterface() {
       >
         <Card className="border-pink-200">
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="relative w-full max-w-sm">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search services & products..."
-                  className="pl-8 border-pink-200"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+            <div ref={searchRef}>
+              <div className="flex items-center justify-between">
+                <div className="relative w-full max-w-sm">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder="Search services & products..."
+                    className="pl-8 border-pink-200"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => setShowSearchKeyboard(true)}
+                    onClick={() => setShowSearchKeyboard(true)}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant={showSearchKeyboard ? "default" : "outline"}
+                  size="sm"
+                  className={`transition-all duration-200 text-xs ml-2 ${
+                    showSearchKeyboard
+                      ? "bg-pink-600 hover:bg-pink-700 text-white"
+                      : "border-pink-300 text-pink-600 hover:bg-pink-50"
+                  }`}
+                  onClick={() => {
+                    setShowSearchKeyboard(!showSearchKeyboard);
+                    // Hide voucher keyboard when showing search keyboard
+                    setShowKeyboard(false);
+                    setActiveKeyboardField(null);
+                  }}
+                >
+                  <span className="mr-1">⌨️</span>
+                  {showSearchKeyboard ? "Hide Keyboard" : "Show Keyboard"}
+                </Button>
               </div>
+              {showSearchKeyboard && (
+                <div className="mt-3 bg-pink-50 rounded-md p-2 border border-pink-100">
+                  <OnScreenKeyboard
+                    onKeyPress={(key) => {
+                      if (key === "backspace") {
+                        setSearchQuery((prev) => prev.slice(0, -1));
+                      } else if (key === "space") {
+                        setSearchQuery((prev) => prev + " ");
+                      } else if (key === "clear") {
+                        setSearchQuery("");
+                      } else {
+                        setSearchQuery((prev) => prev + key);
+                      }
+                    }}
+                  />
+                </div>
+              )}
             </div>
           </CardHeader>
           <CardContent>
@@ -784,6 +843,8 @@ export default function PosInterface() {
                                     activeKeyboardField || "voucherCode"
                                   );
                                 }
+                                // Hide search keyboard when showing voucher keyboard
+                                setShowSearchKeyboard(false);
                               }}
                             >
                               <span className="mr-1">⌨️</span>
