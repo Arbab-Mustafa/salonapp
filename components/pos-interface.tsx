@@ -88,12 +88,6 @@ export default function PosInterface() {
     name: label,
   }));
 
-  useEffect(() => {
-    if (user?.role === "therapist" && user.id && user.name) {
-      setSelectedTherapist({ id: user.id, name: user.name });
-    }
-  }, [user]);
-
   const addToCart = (product: {
     id: string;
     name: string;
@@ -140,9 +134,7 @@ export default function PosInterface() {
     setCustomDiscountAmount("");
     setShowDiscountOptions(false);
     setSelectedCustomer(null);
-    if (user?.role === "owner" || user?.role === "manager") {
-      setSelectedTherapist(null);
-    }
+    setSelectedTherapist(null);
   };
 
   const handleCheckout = () => {
@@ -153,6 +145,7 @@ export default function PosInterface() {
 
     if (!selectedTherapist) {
       toast.error("Please select a therapist before checkout");
+      setShowTherapistSelector(true);
       return;
     }
 
@@ -251,13 +244,17 @@ export default function PosInterface() {
       paymentMethod: method.toLowerCase(),
       status: "completed",
       discountType,
-      discountPercentage: discountType === "percentage" ? discountPercentage : null,
+      discountPercentage:
+        discountType === "percentage" ? discountPercentage : null,
       voucherCode: discountType === "voucher" ? voucherCode : null,
       voucherAmount: discountType === "voucher" ? voucherAmount : null,
     };
 
     // Log final transaction data being sent
-    console.log("Transaction Data Being Sent to Backend:", JSON.stringify(transactionData, null, 2));
+    console.log(
+      "Transaction Data Being Sent to Backend:",
+      JSON.stringify(transactionData, null, 2)
+    );
 
     try {
       console.log("Sending POST request to /api/transactions");
