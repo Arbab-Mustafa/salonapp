@@ -90,6 +90,7 @@ export default function CustomerManagement() {
     "all"
   );
   const [showKeyboard, setShowKeyboard] = useState(false);
+  const [showSearchKeyboard, setShowSearchKeyboard] = useState(false);
   const [activeField, setActiveField] = useState<
     "name" | "mobile" | "email" | "notes" | null
   >(null);
@@ -306,15 +307,58 @@ export default function CustomerManagement() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="relative w-full sm:w-64">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search customers..."
-            className="pl-8 border-pink-200"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        <div className="w-full flex flex-col sm:flex-row sm:items-start gap-2">
+          <div className="flex flex-row items-center gap-2 w-full max-w-xl">
+            <div className="relative flex-1 min-w-0">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search customers..."
+                className="pl-8 border-pink-200 w-full sm:w-80 md:w-96 lg:w-[400px]"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setShowSearchKeyboard(true)}
+                style={{ minWidth: '200px', maxWidth: '100%' }}
+              />
+            </div>
+            <Button
+              type="button"
+              variant={showSearchKeyboard ? "default" : "outline"}
+              size="sm"
+              className={`transition-all duration-200 text-xs ${
+                showSearchKeyboard
+                  ? "bg-pink-600 hover:bg-pink-700 text-white"
+                  : "border-pink-300 text-pink-600 hover:bg-pink-50"
+              }`}
+              onClick={() => setShowSearchKeyboard(!showSearchKeyboard)}
+            >
+              <span className="mr-1">⌨️</span>
+              {showSearchKeyboard ? "Hide Keyboard" : "Show Keyboard"}
+            </Button>
+          </div>
+          {showSearchKeyboard && (
+            <div className="ml-0 sm:ml-4 mt-2 sm:mt-0 bg-gradient-to-br from-pink-50 to-purple-50 p-4 rounded-xl border border-pink-200 shadow-sm z-10">
+              <div className="flex items-center justify-center mb-2">
+                <h3 className="text-base font-semibold text-pink-800 flex items-center">
+                  <span className="mr-2">⌨️</span>
+                  Virtual Keyboard
+                </h3>
+              </div>
+              <OnScreenKeyboard
+                onKeyPress={(key) => {
+                  if (key === "backspace") {
+                    setSearchQuery((prev) => prev.slice(0, -1));
+                  } else if (key === "space") {
+                    setSearchQuery((prev) => prev + " ");
+                  } else if (key === "clear") {
+                    setSearchQuery("");
+                  } else {
+                    setSearchQuery((prev) => prev + key);
+                  }
+                }}
+              />
+            </div>
+          )}
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>

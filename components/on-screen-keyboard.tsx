@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { SkipBackIcon as Backspace } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { SkipBackIcon as Backspace } from "lucide-react";
 
 interface OnScreenKeyboardProps {
-  onKeyPress: (key: string) => void
+  onKeyPress: (key: string) => void;
 }
 
 export function OnScreenKeyboard({ onKeyPress }: OnScreenKeyboardProps) {
@@ -13,7 +13,7 @@ export function OnScreenKeyboard({ onKeyPress }: OnScreenKeyboardProps) {
     ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
     ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
     ["z", "x", "c", "v", "b", "n", "m", "@", "."],
-  ]
+  ];
 
   return (
     <div className="flex flex-col gap-1">
@@ -32,16 +32,28 @@ export function OnScreenKeyboard({ onKeyPress }: OnScreenKeyboardProps) {
         </div>
       ))}
       <div className="flex gap-1 justify-center mt-1">
-        <Button variant="outline" className="h-10 px-3 border-pink-100" onClick={() => onKeyPress("backspace")}>
+        <Button
+          variant="outline"
+          className="h-10 px-3 border-pink-100"
+          onClick={() => onKeyPress("backspace")}
+        >
           <Backspace className="h-4 w-4" />
         </Button>
-        <Button variant="outline" className="h-10 flex-1 border-pink-100" onClick={() => onKeyPress("space")}>
+        <Button
+          variant="outline"
+          className="h-10 flex-1 border-pink-100"
+          onClick={() => onKeyPress("space")}
+        >
           Space
         </Button>
-        <Button variant="outline" className="h-10 px-3 border-pink-100" onClick={() => onKeyPress("clear")}>
+        <Button
+          variant="outline"
+          className="h-10 px-3 border-pink-100"
+          onClick={() => onKeyPress("clear")}
+        >
           Clear
         </Button>
       </div>
     </div>
-  )
+  );
 }
