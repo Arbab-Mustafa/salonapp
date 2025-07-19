@@ -48,11 +48,45 @@ export async function PUT(
     const data = await req.json();
     await connectToDatabase();
 
+    // Validate required fields
+    if (!data.name || !data.name.trim()) {
+      return NextResponse.json(
+        { error: "Customer name is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!data.phone || !data.phone.trim()) {
+      return NextResponse.json(
+        { error: "Phone number is required" },
+        { status: 400 }
+      );
+    }
+
+    // Validate email format if provided
+    if (
+      data.email &&
+      data.email.trim() &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())
+    ) {
+      return NextResponse.json(
+        { error: "Please enter a valid email address" },
+        { status: 400 }
+      );
+    }
+
     // Defensive: ensure phone/mobile
     if (!data.phone && data.mobile) data.phone = data.mobile;
     if (!data.mobile && data.phone) data.mobile = data.phone;
 
-    const updateData = { ...data, updatedAt: new Date() };
+    const updateData = {
+      ...data,
+      updatedAt: new Date(),
+      name: data.name.trim(),
+      phone: data.phone.trim(),
+      email: data.email?.trim() || undefined, // Only save if not empty
+    };
+
     if (!("active" in data)) {
       delete updateData.active; // Don't overwrite if not sent
     }
@@ -72,6 +106,15 @@ export async function PUT(
     return NextResponse.json(customer);
   } catch (error: any) {
     console.error("Error updating customer:", error);
+
+    // Handle duplicate email error
+    if (error.code === 11000 && error.keyPattern?.email) {
+      return NextResponse.json(
+        { error: "A customer with this email already exists" },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       { error: error.message || "Internal server error" },
       { status: 500 }

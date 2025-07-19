@@ -15,13 +15,12 @@ export function OnScreenKeyboard({ onKeyPress }: OnScreenKeyboardProps) {
     ["z", "x", "c", "v", "b", "n", "m", "@", "."],
   ];
 
-  // Enhanced key press handler that prevents focus loss
+  // Enhanced key press handler that maintains focus without preventDefault
   const handleKeyPress = (
     key: string,
     e: React.MouseEvent | React.TouchEvent
   ) => {
-    // Prevent default to avoid focus issues
-    e.preventDefault();
+    // Stop propagation to prevent focus loss
     e.stopPropagation();
 
     // Call the original onKeyPress
@@ -46,8 +45,6 @@ export function OnScreenKeyboard({ onKeyPress }: OnScreenKeyboardProps) {
               variant="outline"
               className="h-10 w-10 p-0 text-center border-pink-100 touch-manipulation keyboard-button"
               onClick={(e) => handleKeyPress(key, e)}
-              onTouchStart={(e) => e.preventDefault()}
-              onTouchEnd={(e) => e.preventDefault()}
             >
               {key}
             </Button>
@@ -59,8 +56,6 @@ export function OnScreenKeyboard({ onKeyPress }: OnScreenKeyboardProps) {
           variant="outline"
           className="h-10 px-3 border-pink-100 touch-manipulation keyboard-button"
           onClick={(e) => handleKeyPress("backspace", e)}
-          onTouchStart={(e) => e.preventDefault()}
-          onTouchEnd={(e) => e.preventDefault()}
         >
           <Backspace className="h-4 w-4" />
         </Button>
@@ -68,8 +63,6 @@ export function OnScreenKeyboard({ onKeyPress }: OnScreenKeyboardProps) {
           variant="outline"
           className="h-10 flex-1 border-pink-100 touch-manipulation keyboard-button"
           onClick={(e) => handleKeyPress("space", e)}
-          onTouchStart={(e) => e.preventDefault()}
-          onTouchEnd={(e) => e.preventDefault()}
         >
           Space
         </Button>
@@ -77,8 +70,6 @@ export function OnScreenKeyboard({ onKeyPress }: OnScreenKeyboardProps) {
           variant="outline"
           className="h-10 px-3 border-pink-100 touch-manipulation keyboard-button"
           onClick={(e) => handleKeyPress("clear", e)}
-          onTouchStart={(e) => e.preventDefault()}
-          onTouchEnd={(e) => e.preventDefault()}
         >
           Clear
         </Button>

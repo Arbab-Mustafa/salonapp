@@ -71,7 +71,7 @@ export function AddCustomerForm({ onSuccess, onCancel }: AddCustomerFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Basic validation
+    // Enhanced validation
     if (!firstName.trim()) {
       toast.error("First name is required");
       return;
@@ -82,6 +82,12 @@ export function AddCustomerForm({ onSuccess, onCancel }: AddCustomerFormProps) {
       return;
     }
 
+    // Validate email format if provided
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
     // Create full name
     const fullName = `${firstName} ${lastName}`.trim();
 
@@ -89,7 +95,7 @@ export function AddCustomerForm({ onSuccess, onCancel }: AddCustomerFormProps) {
     const newCustomer = await addCustomer({
       name: fullName,
       phone: mobile,
-      email: email,
+      email: email.trim() || undefined, // Only send if not empty
       active: true,
     });
 

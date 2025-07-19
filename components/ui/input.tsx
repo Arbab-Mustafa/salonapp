@@ -1,6 +1,6 @@
-import * as React from "react"
+import * as React from "react";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
   ({ className, type, ...props }, ref) => {
@@ -10,8 +10,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
 
     // Handle touch events to maintain focus
     const handleTouchStart = (e: React.TouchEvent) => {
-      // Prevent default to avoid blur issues on touch devices
-      e.preventDefault();
+      // Focus the input on touch
       if (inputRef.current) {
         inputRef.current.focus();
         setIsFocused(true);
@@ -33,16 +32,17 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
       setIsFocused(true);
       setIsKeyboardActive(false);
       // Add a class to indicate active state
-      e.target.classList.add('touch-active');
+      e.target.classList.add("touch-active");
       props.onFocus?.(e);
     };
 
     const handleBlur = (e: React.FocusEvent) => {
       // Check if the blur is caused by clicking on keyboard
       const target = e.relatedTarget as HTMLElement;
-      const isKeyboardButton = target?.closest('.on-screen-keyboard') || 
-                              target?.classList.contains('keyboard-button');
-      
+      const isKeyboardButton =
+        target?.closest(".on-screen-keyboard") ||
+        target?.classList.contains("keyboard-button");
+
       if (isKeyboardButton) {
         // Don't remove focus state, just mark keyboard as active
         setIsKeyboardActive(true);
@@ -59,7 +59,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
         setIsKeyboardActive(false);
         // Remove active class but delay to allow for touch events
         setTimeout(() => {
-          e.target.classList.remove('touch-active');
+          e.target.classList.remove("touch-active");
         }, 100);
       }
       props.onBlur?.(e);
@@ -69,14 +69,15 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
     React.useEffect(() => {
       const handleKeyboardClick = (e: MouseEvent) => {
         const target = e.target as HTMLElement;
-        const isKeyboardButton = target?.closest('.on-screen-keyboard') || 
-                                target?.classList.contains('keyboard-button');
-        
+        const isKeyboardButton =
+          target?.closest(".on-screen-keyboard") ||
+          target?.classList.contains("keyboard-button");
+
         if (isKeyboardButton && inputRef.current) {
           // Mark keyboard as active and maintain focus
           setIsKeyboardActive(true);
           setIsFocused(true);
-          
+
           // Ensure input stays focused
           setTimeout(() => {
             if (inputRef.current) {
@@ -89,22 +90,27 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
 
       const handleDocumentClick = (e: MouseEvent) => {
         const target = e.target as HTMLElement;
-        const isKeyboardButton = target?.closest('.on-screen-keyboard') || 
-                                target?.classList.contains('keyboard-button');
-        
+        const isKeyboardButton =
+          target?.closest(".on-screen-keyboard") ||
+          target?.classList.contains("keyboard-button");
+
         // If clicking outside keyboard and input, remove focus
-        if (!isKeyboardButton && inputRef.current && !inputRef.current.contains(target)) {
+        if (
+          !isKeyboardButton &&
+          inputRef.current &&
+          !inputRef.current.contains(target)
+        ) {
           setIsFocused(false);
           setIsKeyboardActive(false);
         }
       };
 
-      document.addEventListener('click', handleKeyboardClick);
-      document.addEventListener('click', handleDocumentClick);
-      
+      document.addEventListener("click", handleKeyboardClick);
+      document.addEventListener("click", handleDocumentClick);
+
       return () => {
-        document.removeEventListener('click', handleKeyboardClick);
-        document.removeEventListener('click', handleDocumentClick);
+        document.removeEventListener("click", handleKeyboardClick);
+        document.removeEventListener("click", handleDocumentClick);
       };
     }, []);
 
@@ -121,7 +127,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
         )}
         ref={(node) => {
           // Handle both refs
-          if (typeof ref === 'function') {
+          if (typeof ref === "function") {
             ref(node);
           } else if (ref) {
             ref.current = node;
@@ -134,9 +140,9 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
         onBlur={handleBlur}
         {...props}
       />
-    )
+    );
   }
-)
-Input.displayName = "Input"
+);
+Input.displayName = "Input";
 
-export { Input }
+export { Input };

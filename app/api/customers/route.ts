@@ -28,9 +28,25 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { name, phone, email } = body;
 
-    if (!name) {
+    // Validate required fields
+    if (!name || !name.trim()) {
       return NextResponse.json(
         { error: "Customer name is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!phone || !phone.trim()) {
+      return NextResponse.json(
+        { error: "Phone number is required" },
+        { status: 400 }
+      );
+    }
+
+    // Validate email format if provided
+    if (email && email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      return NextResponse.json(
+        { error: "Please enter a valid email address" },
         { status: 400 }
       );
     }
@@ -38,9 +54,9 @@ export async function POST(req: Request) {
     await connectToDatabase();
 
     const customer = await Customer.create({
-      name,
-      phone,
-      email,
+      name: name.trim(),
+      phone: phone.trim(),
+      email: email?.trim() || undefined, // Only save if not empty
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -48,6 +64,15 @@ export async function POST(req: Request) {
     return NextResponse.json(customer);
   } catch (error: any) {
     console.error("Error creating customer:", error);
+    
+    // Handle duplicate email error
+    if (error.code === 11000 && error.keyPattern?.email) {
+      return NextResponse.json(
+        { error: "A customer with this email already exists" },
+        { status: 400 }
+      );
+    }
+    
     return NextResponse.json(
       { error: "Failed to create customer" },
       { status: 500 }

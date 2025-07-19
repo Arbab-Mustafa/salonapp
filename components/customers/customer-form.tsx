@@ -12,7 +12,6 @@ import { toast } from "sonner";
 interface CustomerFormProps {
   initialData?: {
     _id?: string;
-    id?: string; // Add support for both _id and id
     name: string;
     email: string;
     phone: string;
@@ -42,10 +41,6 @@ export function CustomerForm({ initialData }: CustomerFormProps) {
     | "notes"
     | null
   >(null);
-
-  // Get the customer ID (support both _id and id)
-  const customerId = initialData?._id || initialData?.id;
-
   const [formData, setFormData] = useState({
     name: initialData?.name || "",
     email: initialData?.email || "",
@@ -65,27 +60,49 @@ export function CustomerForm({ initialData }: CustomerFormProps) {
     setIsLoading(true);
 
     try {
-      // Determine if this is an edit or create operation
-      const isEditing = !!customerId;
+      // Client-side validation
+      if (!formData.name.trim()) {
+        toast.error("Customer name is required");
+        setIsLoading(false);
+        return;
+      }
 
-      const url = isEditing ? `/api/customers/${customerId}` : "/api/customers";
+      if (!formData.phone.trim()) {
+        toast.error("Phone number is required");
+        setIsLoading(false);
+        return;
+      }
 
-      const method = isEditing ? "PUT" : "POST";
+      // Validate email format if provided
+      if (
+        formData.email.trim() &&
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())
+      ) {
+        toast.error("Please enter a valid email address");
+        setIsLoading(false);
+        return;
+      }
 
-      console.log("Customer Form Submit:", {
-        isEditing,
-        customerId,
-        url,
-        method,
-        formData,
-      });
+      const url = initialData?._id
+        ? `/api/customers/${initialData._id}`
+        : "/api/customers";
+
+      const method = initialData?._id ? "PUT" : "POST";
+
+      // Prepare data for API
+      const apiData = {
+        ...formData,
+        name: formData.name.trim(),
+        phone: formData.phone.trim(),
+        email: formData.email.trim() || undefined, // Only send if not empty
+      };
 
       const response = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(apiData),
       });
 
       const data = await response.json();
@@ -95,7 +112,7 @@ export function CustomerForm({ initialData }: CustomerFormProps) {
       }
 
       toast.success(
-        isEditing
+        initialData?._id
           ? "Customer updated successfully"
           : "Customer created successfully"
       );
@@ -175,14 +192,6 @@ export function CustomerForm({ initialData }: CustomerFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Debug Info - Remove in production */}
-      {process.env.NODE_ENV === "development" && (
-        <div className="p-2 bg-gray-100 rounded text-xs">
-          <p>Customer ID: {customerId || "None (Creating new)"}</p>
-          <p>Is Editing: {!!customerId ? "Yes" : "No"}</p>
-        </div>
-      )}
-
       <div className="grid gap-4">
         <div className="grid gap-2">
           <Label htmlFor="name">Name</Label>
@@ -207,7 +216,6 @@ export function CustomerForm({ initialData }: CustomerFormProps) {
             value={formData.email}
             onChange={handleChange}
             onFocus={() => setActiveField("email")}
-            required
             className="border-pink-200"
           />
         </div>
@@ -321,7 +329,7 @@ export function CustomerForm({ initialData }: CustomerFormProps) {
           Cancel
         </Button>
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Saving..." : customerId ? "Update" : "Create"}
+          {isLoading ? "Saving..." : initialData?._id ? "Update" : "Create"}
         </Button>
       </div>
     </form>
