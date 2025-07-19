@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function ServicesPage() {
   return (
-    <ProtectedRoute allowedRoles={["owner"]}>
+    <ProtectedRoute allowedRoles={["owner", "therapist", "manager"]}>
       <div className="min-h-screen bg-pink-200">
         <DashboardHeader />
         <main className="container mx-auto p-4 pt-24">

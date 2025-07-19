@@ -14,7 +14,7 @@ interface ProtectedRouteProps {
 const ROUTE_ACCESS: Record<string, string[]> = {
   "/dashboard": ["owner"],
   "/users": ["owner"],
-  "/services": ["owner"],
+  "/services": ["owner", "therapist", "manager"],
   "/pos": ["owner", "therapist", "manager"],
   "/reports": ["owner", "therapist", "manager"],
   "/hours": ["owner"],
