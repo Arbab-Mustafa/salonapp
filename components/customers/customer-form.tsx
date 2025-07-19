@@ -12,6 +12,7 @@ import { toast } from "sonner";
 interface CustomerFormProps {
   initialData?: {
     _id?: string;
+    id?: string; // Add support for both _id and id
     name: string;
     email: string;
     phone: string;
@@ -41,6 +42,10 @@ export function CustomerForm({ initialData }: CustomerFormProps) {
     | "notes"
     | null
   >(null);
+
+  // Get the customer ID (support both _id and id)
+  const customerId = initialData?._id || initialData?.id;
+
   const [formData, setFormData] = useState({
     name: initialData?.name || "",
     email: initialData?.email || "",
@@ -60,11 +65,20 @@ export function CustomerForm({ initialData }: CustomerFormProps) {
     setIsLoading(true);
 
     try {
-      const url = initialData?._id
-        ? `/api/customers/${initialData._id}`
-        : "/api/customers";
+      // Determine if this is an edit or create operation
+      const isEditing = !!customerId;
 
-      const method = initialData?._id ? "PUT" : "POST";
+      const url = isEditing ? `/api/customers/${customerId}` : "/api/customers";
+
+      const method = isEditing ? "PUT" : "POST";
+
+      console.log("Customer Form Submit:", {
+        isEditing,
+        customerId,
+        url,
+        method,
+        formData,
+      });
 
       const response = await fetch(url, {
         method,
@@ -81,7 +95,7 @@ export function CustomerForm({ initialData }: CustomerFormProps) {
       }
 
       toast.success(
-        initialData?._id
+        isEditing
           ? "Customer updated successfully"
           : "Customer created successfully"
       );
@@ -161,6 +175,14 @@ export function CustomerForm({ initialData }: CustomerFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Debug Info - Remove in production */}
+      {process.env.NODE_ENV === "development" && (
+        <div className="p-2 bg-gray-100 rounded text-xs">
+          <p>Customer ID: {customerId || "None (Creating new)"}</p>
+          <p>Is Editing: {!!customerId ? "Yes" : "No"}</p>
+        </div>
+      )}
+
       <div className="grid gap-4">
         <div className="grid gap-2">
           <Label htmlFor="name">Name</Label>
@@ -299,7 +321,7 @@ export function CustomerForm({ initialData }: CustomerFormProps) {
           Cancel
         </Button>
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Saving..." : initialData?._id ? "Update" : "Create"}
+          {isLoading ? "Saving..." : customerId ? "Update" : "Create"}
         </Button>
       </div>
     </form>

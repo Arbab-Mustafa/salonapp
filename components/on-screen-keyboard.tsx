@@ -15,16 +15,39 @@ export function OnScreenKeyboard({ onKeyPress }: OnScreenKeyboardProps) {
     ["z", "x", "c", "v", "b", "n", "m", "@", "."],
   ];
 
+  // Enhanced key press handler that prevents focus loss
+  const handleKeyPress = (
+    key: string,
+    e: React.MouseEvent | React.TouchEvent
+  ) => {
+    // Prevent default to avoid focus issues
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Call the original onKeyPress
+    onKeyPress(key);
+
+    // Ensure the active input maintains focus
+    setTimeout(() => {
+      const activeElement = document.activeElement;
+      if (activeElement && activeElement.tagName === "INPUT") {
+        (activeElement as HTMLInputElement).focus();
+      }
+    }, 10);
+  };
+
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1 on-screen-keyboard">
       {rows.map((row, rowIndex) => (
         <div key={rowIndex} className="flex gap-1 justify-center">
           {row.map((key) => (
             <Button
               key={key}
               variant="outline"
-              className="h-10 w-10 p-0 text-center border-pink-100"
-              onClick={() => onKeyPress(key)}
+              className="h-10 w-10 p-0 text-center border-pink-100 touch-manipulation keyboard-button"
+              onClick={(e) => handleKeyPress(key, e)}
+              onTouchStart={(e) => e.preventDefault()}
+              onTouchEnd={(e) => e.preventDefault()}
             >
               {key}
             </Button>
@@ -34,22 +57,28 @@ export function OnScreenKeyboard({ onKeyPress }: OnScreenKeyboardProps) {
       <div className="flex gap-1 justify-center mt-1">
         <Button
           variant="outline"
-          className="h-10 px-3 border-pink-100"
-          onClick={() => onKeyPress("backspace")}
+          className="h-10 px-3 border-pink-100 touch-manipulation keyboard-button"
+          onClick={(e) => handleKeyPress("backspace", e)}
+          onTouchStart={(e) => e.preventDefault()}
+          onTouchEnd={(e) => e.preventDefault()}
         >
           <Backspace className="h-4 w-4" />
         </Button>
         <Button
           variant="outline"
-          className="h-10 flex-1 border-pink-100"
-          onClick={() => onKeyPress("space")}
+          className="h-10 flex-1 border-pink-100 touch-manipulation keyboard-button"
+          onClick={(e) => handleKeyPress("space", e)}
+          onTouchStart={(e) => e.preventDefault()}
+          onTouchEnd={(e) => e.preventDefault()}
         >
           Space
         </Button>
         <Button
           variant="outline"
-          className="h-10 px-3 border-pink-100"
-          onClick={() => onKeyPress("clear")}
+          className="h-10 px-3 border-pink-100 touch-manipulation keyboard-button"
+          onClick={(e) => handleKeyPress("clear", e)}
+          onTouchStart={(e) => e.preventDefault()}
+          onTouchEnd={(e) => e.preventDefault()}
         >
           Clear
         </Button>
