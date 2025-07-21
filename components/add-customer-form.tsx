@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,8 +26,43 @@ export function AddCustomerForm({ onSuccess, onCancel }: AddCustomerFormProps) {
     "firstName" | "lastName" | "mobile" | "email" | null
   >(null);
 
+  // Refs for each input
+  const firstNameRef = useRef<HTMLInputElement>(null);
+  const lastNameRef = useRef<HTMLInputElement>(null);
+  const mobileRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+
+  // Helper to get the current input ref
+  const getActiveInputRef = () => {
+    switch (activeField) {
+      case "firstName":
+        return firstNameRef;
+      case "lastName":
+        return lastNameRef;
+      case "mobile":
+        return mobileRef;
+      case "email":
+        return emailRef;
+      default:
+        return null;
+    }
+  };
+
+  // Helper to determine if the blue ring should be shown
+  const isActive = (field: typeof activeField) => activeField === field;
+
+  // --- NEW: Global flag for keyboard interaction ---
+  const setKeyboardActive = () => {
+    (window as any)._keyboardActive = true;
+  };
+  const clearKeyboardActive = () => {
+    (window as any)._keyboardActive = false;
+  };
+  const isKeyboardActive = () => (window as any)._keyboardActive;
+
   const handleKeyPress = (key: string) => {
     if (!activeField) return;
+    setKeyboardActive();
 
     const updateField = (
       field: string,
@@ -52,7 +87,6 @@ export function AddCustomerForm({ onSuccess, onCancel }: AddCustomerFormProps) {
         updateField(lastName, setLastName);
         break;
       case "mobile":
-        // Only allow numbers and spaces for mobile
         if (
           key === "backspace" ||
           key === "clear" ||
@@ -66,6 +100,9 @@ export function AddCustomerForm({ onSuccess, onCancel }: AddCustomerFormProps) {
         updateField(email, setEmail);
         break;
     }
+    // DO NOT focus any input here!
+    // Only the user tapping an input should change focus.
+    setTimeout(clearKeyboardActive, 100);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -108,101 +145,72 @@ export function AddCustomerForm({ onSuccess, onCancel }: AddCustomerFormProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg w-[30rem]  flex flex-col">
-      <div className="p-3 border-b flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Add New Customer</h2>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onCancel}
-          className="h-7 w-7"
-        >
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
-
-      <form onSubmit={handleSubmit} className="p-3 flex-1 overflow-y-auto">
-        <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="firstName" className="text-sm">
-                First Name *
-              </Label>
-              <Input
-                id="firstName"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                onFocus={() => setActiveField("firstName")}
-                className="border-pink-200 h-9"
-                required
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="lastName" className="text-sm">
-                Last Name
-              </Label>
-              <Input
-                id="lastName"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                onFocus={() => setActiveField("lastName")}
-                className="border-pink-200 h-9"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="mobile" className="text-sm">
-              Mobile Number *
-            </Label>
-            <Input
-              id="mobile"
-              value={mobile}
-              onChange={(e) => setMobile(e.target.value)}
-              onFocus={() => setActiveField("mobile")}
-              className="border-pink-200 h-9"
-              required
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="email" className="text-sm">
-              Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onFocus={() => setActiveField("email")}
-              className="border-pink-200 h-9"
-            />
-          </div>
-        </div>
-
-        {activeField && (
-          <div className="mt-3 border-t pt-3">
-            <OnScreenKeyboard onKeyPress={handleKeyPress} />
-          </div>
-        )}
-
-        <div className="mt-4 flex gap-2">
-          <Button
-            type="submit"
-            className="flex-1 bg-pink-600 hover:bg-pink-700 h-9"
-          >
-            Add Customer
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            className="flex-1 h-9"
-          >
-            Cancel
-          </Button>
-        </div>
+    <div className="bg-white rounded-lg shadow-lg w-full max-w-md h-[65vh] max-h-[65vh] flex flex-col justify-between p-2">
+      <form className="flex-1 flex flex-col justify-center gap-2">
+        <input
+          ref={firstNameRef}
+          value={firstName}
+          onChange={e => setFirstName(e.target.value)}
+          onFocus={() => setActiveField("firstName")}
+          onBlur={e => {
+            // Only clear if not clicking on keyboard
+            if (!e.relatedTarget || !e.relatedTarget.classList.contains("keyboard-button")) {
+              setActiveField(null);
+            }
+          }}
+          className={`h-8 text-sm px-2 rounded border border-pink-200 mb-2 ${isActive("firstName") ? "ring-2 ring-blue-500" : ""}`}
+          placeholder="Full Name"
+        />
+        <input
+          ref={lastNameRef}
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+          onFocus={() => {
+            setActiveField("lastName");
+          }}
+          onBlur={(e) => {
+            if (isKeyboardActive()) {
+              e.preventDefault();
+              e.target.focus();
+              return;
+            }
+            if (!e.relatedTarget || !e.relatedTarget.classList.contains("keyboard-button")) {
+              setActiveField(null);
+            }
+          }}
+          className={`h-8 text-sm px-2 rounded border border-pink-200 mb-2 ${isActive("lastName") ? "ring-2 ring-blue-500" : ""}`}
+          placeholder="Last Name"
+        />
+        <input
+          ref={mobileRef}
+          value={mobile}
+          onChange={e => setMobile(e.target.value)}
+          onFocus={() => setActiveField("mobile")}
+          onBlur={e => {
+            if (!e.relatedTarget || !e.relatedTarget.classList.contains("keyboard-button")) {
+              setActiveField(null);
+            }
+          }}
+          className={`h-8 text-sm px-2 rounded border border-pink-200 mb-2 ${isActive("mobile") ? "ring-2 ring-blue-500" : ""}`}
+          placeholder="Mobile Number"
+        />
+        <input
+          ref={emailRef}
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          onFocus={() => setActiveField("email")}
+          onBlur={e => {
+            if (!e.relatedTarget || !e.relatedTarget.classList.contains("keyboard-button")) {
+              setActiveField(null);
+            }
+          }}
+          className={`h-8 text-sm px-2 rounded border border-pink-200 mb-2 ${isActive("email") ? "ring-2 ring-blue-500" : ""}`}
+          placeholder="Email"
+        />
       </form>
+      <div className="h-[30vh] max-h-[30vh] flex flex-col justify-end">
+        <OnScreenKeyboard onKeyPress={handleKeyPress} />
+      </div>
     </div>
   );
 }
