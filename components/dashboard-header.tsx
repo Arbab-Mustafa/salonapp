@@ -26,11 +26,13 @@ import {
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import Logo from "./logo";
+import ROUTE_ACCESS from "./protected-route";
 
 export default function DashboardHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
   const { data: session, status } = useSession();
+  const userRole = session?.user?.role;
 
   const handleLogout = async () => {
     await signOut({ redirect: false });
@@ -76,6 +78,13 @@ export default function DashboardHeader() {
     },
   ];
 
+  // Filter navLinks based on ROUTE_ACCESS and userRole
+  const filteredNavLinks = navLinks.filter((link) => {
+    const routeKey = link.href.split("/")[1] ? `/${link.href.split("/")[1]}` : link.href;
+    const allowedRoles = ROUTE_ACCESS[routeKey];
+    return !allowedRoles || allowedRoles.includes(userRole);
+  });
+
   return (
     <header className="fixed top-0 left-0 right-0 bg-white border-b border-pink-200 z-20">
       <div className="container mx-auto px-4 flex items-center justify-between h-16">
@@ -90,7 +99,7 @@ export default function DashboardHeader() {
         </div>
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center space-x-6">
-          {navLinks.map((link) => (
+          {filteredNavLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -145,7 +154,7 @@ export default function DashboardHeader() {
       {mobileMenuOpen && (
         <nav className="md:hidden bg-white border-t border-pink-100 py-2 shadow">
           <div className="container mx-auto px-4 space-y-1 flex flex-col">
-            {navLinks.map((link) => (
+            {filteredNavLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}

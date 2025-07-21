@@ -16,7 +16,7 @@ const ROUTE_ACCESS: Record<string, string[]> = {
   "/users": ["owner"],
   "/services": ["owner", "therapist", "manager"],
   "/pos": ["owner", "therapist", "manager"],
-  "/reports": ["owner", "therapist", "manager"],
+  "/reports": ["owner", "manager"],
   "/hours": ["owner"],
   "/test-data": ["owner"],
   "/customers": ["owner", "therapist", "manager"],
