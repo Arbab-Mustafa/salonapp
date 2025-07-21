@@ -22,9 +22,7 @@ export function AddCustomerForm({ onSuccess, onCancel }: AddCustomerFormProps) {
   const [lastName, setLastName] = useState("");
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
-  const [activeField, setActiveField] = useState<
-    "firstName" | "lastName" | "mobile" | "email" | null
-  >(null);
+  const [activeField, setActiveField] = useState<string | null>(null);
 
   // Refs for each input
   const firstNameRef = useRef<HTMLInputElement>(null);
@@ -100,8 +98,12 @@ export function AddCustomerForm({ onSuccess, onCancel }: AddCustomerFormProps) {
         updateField(email, setEmail);
         break;
     }
-    // DO NOT focus any input here!
-    // Only the user tapping an input should change focus.
+
+    // Always re-focus the active input after key press
+    const ref = getActiveInputRef();
+    if (ref && ref.current) {
+      ref.current.focus();
+    }
     setTimeout(clearKeyboardActive, 100);
   };
 
@@ -147,66 +149,62 @@ export function AddCustomerForm({ onSuccess, onCancel }: AddCustomerFormProps) {
   return (
     <div className="bg-white rounded-lg shadow-lg w-full max-w-md h-[65vh] max-h-[65vh] flex flex-col justify-between p-2">
       <form className="flex-1 flex flex-col justify-center gap-2">
-        <input
-          ref={firstNameRef}
-          value={firstName}
-          onChange={e => setFirstName(e.target.value)}
-          onFocus={() => setActiveField("firstName")}
-          onBlur={e => {
-            // Only clear if not clicking on keyboard
-            if (!e.relatedTarget || !e.relatedTarget.classList.contains("keyboard-button")) {
-              setActiveField(null);
-            }
-          }}
-          className={`h-8 text-sm px-2 rounded border border-pink-200 mb-2 ${isActive("firstName") ? "ring-2 ring-blue-500" : ""}`}
-          placeholder="Full Name"
-        />
-        <input
-          ref={lastNameRef}
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-          onFocus={() => {
-            setActiveField("lastName");
-          }}
-          onBlur={(e) => {
-            if (isKeyboardActive()) {
-              e.preventDefault();
-              e.target.focus();
-              return;
-            }
-            if (!e.relatedTarget || !e.relatedTarget.classList.contains("keyboard-button")) {
-              setActiveField(null);
-            }
-          }}
-          className={`h-8 text-sm px-2 rounded border border-pink-200 mb-2 ${isActive("lastName") ? "ring-2 ring-blue-500" : ""}`}
-          placeholder="Last Name"
-        />
-        <input
-          ref={mobileRef}
-          value={mobile}
-          onChange={e => setMobile(e.target.value)}
-          onFocus={() => setActiveField("mobile")}
-          onBlur={e => {
-            if (!e.relatedTarget || !e.relatedTarget.classList.contains("keyboard-button")) {
-              setActiveField(null);
-            }
-          }}
-          className={`h-8 text-sm px-2 rounded border border-pink-200 mb-2 ${isActive("mobile") ? "ring-2 ring-blue-500" : ""}`}
-          placeholder="Mobile Number"
-        />
-        <input
-          ref={emailRef}
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          onFocus={() => setActiveField("email")}
-          onBlur={e => {
-            if (!e.relatedTarget || !e.relatedTarget.classList.contains("keyboard-button")) {
-              setActiveField(null);
-            }
-          }}
-          className={`h-8 text-sm px-2 rounded border border-pink-200 mb-2 ${isActive("email") ? "ring-2 ring-blue-500" : ""}`}
-          placeholder="Email"
-        />
+        <div
+          className={`rounded border border-pink-200 mb-2 transition-shadow ${activeField === "firstName" ? "ring-2 ring-blue-500 shadow-outline" : ""}`}
+        >
+          <input
+            ref={firstNameRef}
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            onFocus={() => setActiveField("firstName")}
+            onTouchStart={() => setActiveField("firstName")}
+            className="h-8 text-sm px-2 rounded w-full bg-transparent outline-none border-none"
+            placeholder="Full Name"
+            autoComplete="off"
+          />
+        </div>
+        <div
+          className={`rounded border border-pink-200 mb-2 transition-shadow ${activeField === "lastName" ? "ring-2 ring-blue-500 shadow-outline" : ""}`}
+        >
+          <input
+            ref={lastNameRef}
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            onFocus={() => setActiveField("lastName")}
+            onTouchStart={() => setActiveField("lastName")}
+            className="h-8 text-sm px-2 rounded w-full bg-transparent outline-none border-none"
+            placeholder="Last Name"
+            autoComplete="off"
+          />
+        </div>
+        <div
+          className={`rounded border border-pink-200 mb-2 transition-shadow ${activeField === "mobile" ? "ring-2 ring-blue-500 shadow-outline" : ""}`}
+        >
+          <input
+            ref={mobileRef}
+            value={mobile}
+            onChange={(e) => setMobile(e.target.value)}
+            onFocus={() => setActiveField("mobile")}
+            onTouchStart={() => setActiveField("mobile")}
+            className="h-8 text-sm px-2 rounded w-full bg-transparent outline-none border-none"
+            placeholder="Mobile Number"
+            autoComplete="off"
+          />
+        </div>
+        <div
+          className={`rounded border border-pink-200 mb-2 transition-shadow ${activeField === "email" ? "ring-2 ring-blue-500 shadow-outline" : ""}`}
+        >
+          <input
+            ref={emailRef}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            onFocus={() => setActiveField("email")}
+            onTouchStart={() => setActiveField("email")}
+            className="h-8 text-sm px-2 rounded w-full bg-transparent outline-none border-none"
+            placeholder="Email"
+            autoComplete="off"
+          />
+        </div>
       </form>
       <div className="h-[30vh] max-h-[30vh] flex flex-col justify-end">
         <OnScreenKeyboard onKeyPress={handleKeyPress} />
