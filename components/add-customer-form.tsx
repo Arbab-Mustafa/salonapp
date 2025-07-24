@@ -206,7 +206,27 @@ export function AddCustomerForm({ onSuccess, onCancel }: AddCustomerFormProps) {
           />
         </div>
       </form>
-      <div className="h-[30vh] max-h-[30vh] flex flex-col justify-end">
+
+      {/* Action Buttons - positioned between form and keyboard */}
+      <div className="flex gap-2 py-2 border-t border-pink-100">
+        <Button
+          type="submit"
+          onClick={handleSubmit}
+          className="flex-1 bg-pink-600 hover:bg-pink-700 h-10 text-sm"
+        >
+          Add Customer
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          className="flex-1 h-10 text-sm"
+        >
+          Cancel
+        </Button>
+      </div>
+
+      <div className="h-[25vh] max-h-[25vh] flex flex-col justify-end">
         <OnScreenKeyboard onKeyPress={handleKeyPress} />
       </div>
     </div>
