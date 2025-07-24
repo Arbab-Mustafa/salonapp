@@ -147,86 +147,91 @@ export function AddCustomerForm({ onSuccess, onCancel }: AddCustomerFormProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg w-full max-w-md h-[65vh] max-h-[65vh] flex flex-col justify-between p-2">
-      <form className="flex-1 flex flex-col justify-center gap-2">
-        <div
-          className={`rounded border border-pink-200 mb-2 transition-shadow ${activeField === "firstName" ? "ring-2 ring-blue-500 shadow-outline" : ""}`}
+    <div className="bg-white rounded-lg shadow-lg w-full max-w-md h-auto   flex flex-col p-3">
+      {/* Header */}
+      <div className="flex items-center justify-between pb-3 border-b border-pink-200 mb-3">
+        <h2 className="text-lg font-semibold text-pink-800">Add New Customer</h2>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onCancel}
+          className="h-8 w-8"
         >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {/* Form Inputs */}
+      <form className="flex-1 flex flex-col justify-start gap-3 mb-4">
+        <div className={`rounded border border-pink-200 transition-shadow ${activeField === "firstName" ? "ring-2 ring-blue-500 shadow-outline" : ""}`}>
           <input
             ref={firstNameRef}
             value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
+            onChange={e => setFirstName(e.target.value)}
             onFocus={() => setActiveField("firstName")}
             onTouchStart={() => setActiveField("firstName")}
-            className="h-8 text-sm px-2 rounded w-full bg-transparent outline-none border-none"
+            className="h-10 text-sm px-3 rounded w-full bg-transparent outline-none border-none"
             placeholder="Full Name"
             autoComplete="off"
           />
         </div>
-        <div
-          className={`rounded border border-pink-200 mb-2 transition-shadow ${activeField === "lastName" ? "ring-2 ring-blue-500 shadow-outline" : ""}`}
-        >
+        <div className={`rounded border border-pink-200 transition-shadow ${activeField === "lastName" ? "ring-2 ring-blue-500 shadow-outline" : ""}`}>
           <input
             ref={lastNameRef}
             value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
+            onChange={e => setLastName(e.target.value)}
             onFocus={() => setActiveField("lastName")}
             onTouchStart={() => setActiveField("lastName")}
-            className="h-8 text-sm px-2 rounded w-full bg-transparent outline-none border-none"
+            className="h-10 text-sm px-3 rounded w-full bg-transparent outline-none border-none"
             placeholder="Last Name"
             autoComplete="off"
           />
         </div>
-        <div
-          className={`rounded border border-pink-200 mb-2 transition-shadow ${activeField === "mobile" ? "ring-2 ring-blue-500 shadow-outline" : ""}`}
-        >
+        <div className={`rounded border border-pink-200 transition-shadow ${activeField === "mobile" ? "ring-2 ring-blue-500 shadow-outline" : ""}`}>
           <input
             ref={mobileRef}
             value={mobile}
-            onChange={(e) => setMobile(e.target.value)}
+            onChange={e => setMobile(e.target.value)}
             onFocus={() => setActiveField("mobile")}
             onTouchStart={() => setActiveField("mobile")}
-            className="h-8 text-sm px-2 rounded w-full bg-transparent outline-none border-none"
+            className="h-10 text-sm px-3 rounded w-full bg-transparent outline-none border-none"
             placeholder="Mobile Number"
             autoComplete="off"
           />
         </div>
-        <div
-          className={`rounded border border-pink-200 mb-2 transition-shadow ${activeField === "email" ? "ring-2 ring-blue-500 shadow-outline" : ""}`}
-        >
+        <div className={`rounded border border-pink-200 transition-shadow ${activeField === "email" ? "ring-2 ring-blue-500 shadow-outline" : ""}`}>
           <input
             ref={emailRef}
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={e => setEmail(e.target.value)}
             onFocus={() => setActiveField("email")}
             onTouchStart={() => setActiveField("email")}
-            className="h-8 text-sm px-2 rounded w-full bg-transparent outline-none border-none"
+            className="h-10 text-sm px-3 rounded w-full bg-transparent outline-none border-none"
             placeholder="Email"
             autoComplete="off"
           />
         </div>
       </form>
 
-      {/* Action Buttons - positioned between form and keyboard */}
-      <div className="flex gap-2 py-2 border-t border-pink-100">
+      {/* Action Buttons - clearly separated from keyboard */}
+      <div className="flex gap-3 mb-4 px-2">
         <Button
-          type="submit"
           onClick={handleSubmit}
-          className="flex-1 bg-pink-600 hover:bg-pink-700 h-10 text-sm"
+          className="flex-1 bg-pink-600 hover:bg-pink-700 h-12 text-base font-semibold rounded-lg shadow-md"
         >
           Add Customer
         </Button>
         <Button
-          type="button"
           variant="outline"
           onClick={onCancel}
-          className="flex-1 h-10 text-sm"
+          className="flex-1 h-12 text-base font-semibold rounded-lg border-pink-300 text-pink-700 hover:bg-pink-50"
         >
           Cancel
         </Button>
       </div>
 
-      <div className="h-[25vh] max-h-[25vh] flex flex-col justify-end">
+      {/* On-Screen Keyboard */}
+      <div className="bg-pink-50 rounded-lg p-2">
         <OnScreenKeyboard onKeyPress={handleKeyPress} />
       </div>
     </div>
